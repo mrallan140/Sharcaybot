@@ -1,9 +1,10 @@
 const { CLIENT_ID, GUILD_ID, token } = require('./conf.json');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-
-
-const { Client, Intents ,MessageActionRow, MessageButton, MessageEmbed} = require('discord.js');
+const pnggen = require('./pnggen');
+const mongohandler = require('./mongohandler');
+mongohandler.init();
+const { Client, Intents ,MessageActionRow, MessageButton, MessageEmbed, MessageAttachment} = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 
@@ -13,7 +14,7 @@ const commands = [{
 },
 {
 	name: 'test',
-	description: "test enbft"
+	description: "test enft"
 }]; 
 
 const rest = new REST({ version: '9' }).setToken(token);
@@ -34,7 +35,6 @@ const rest = new REST({ version: '9' }).setToken(token);
 })();
 
 
-
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -44,63 +44,31 @@ client.on('interactionCreate', async interaction => {
 
 	if (interaction.isCommand()) {
 
-		if (interaction.commandName === 'test') { 
-			interaction.reply('Please enter more input.').then(() => {
-				//const filter = m => interaction.user.id === m.author.id;
-				const filter = m => m.content.startsWith('!vote');
-				console.log(interaction.user.id);
-				interaction.channel.awaitMessages({ time: 60000, max: 1, errors: ['time'] })
-					.then(messages => {
-						console.log(messages.author.id);
-						interaction.followUp(`You've entered: ${messages.first().content}`);
-					})
-					.catch(() => {
-						interaction.followUp('You did not enter any input!');
-					});
-			});
+		if (interaction.commandName === 'Annonce') { 
+			console.log(interaction);
+			await interaction.reply("ok");
 
 		};
 
 
 		if (interaction.commandName === 'annoncehost') {
-			const row = new MessageActionRow()
-				.addComponents(
-					new MessageButton()
-						.setCustomId('in')
-						.setLabel('Je participe')
-						.setStyle('SUCCESS'),
-				)
-				.addComponents(
-					new MessageButton()
-						.setCustomId('out')
-						.setLabel('Je ne participe plus')
-						.setStyle('DANGER'),
-				);
-			const exampleEmbed = new MessageEmbed()
-				.setColor('#0099ff')
-				.setTitle('Private Game')
-				//.setURL('https://discord.js.org/')
-				.setAuthor('Sharcay Bot', 'https://nas.gallan.fr/s/eeHt8QsCbRK6c9n/preview')
-				.setDescription('Inscription pour la Private Game')
-				.setThumbnail('https://nas.gallan.fr/s/eeHt8QsCbRK6c9n/preview')
-				.addFields(
-					{ name: 'Regular field title', value: 'Some value here' },
-					{ name: '\u200B', value: '\u200B' },
-					{ name: 'Date', value: 'Some value here', inline: true },
-					{ name: 'Heure', value: 'Some value here', inline: true },
-				)
-				//.addField('Inline field title', 'Some value here', true)
-				//.setImage('https://nas.gallan.fr/s/pK3bBKRJyf9LKAZ/preview')
-				.setTimestamp()
-				.setFooter('Mrallan140 2021', 'https://nas.gallan.fr/s/eeHt8QsCbRK6c9n/preview');
-			
-			await interaction.reply({content:'Pong!', components: [row],embeds: [exampleEmbed] });
+      var annonce = new mongohandler.Events(interaction.guildId,interaction.channelId,)
+
+			interaction.reply(await annonce.discordmessage())
+      .then(function(msg) {
+        annonce.setmessageid(msg.id);
+        annonce.save();
+      })
+      .catch(console.error);;
 		
 		}
     }
+
+
+	
 	if (interaction.isButton()) {
-		
-		await interaction.reply('Pong!');
+		var annonce = await new mongohandler.Events().getfromdb(interaction.message.id);
+		await interaction.message.edit(await annonce.discordmessage());
 	}
 
 

@@ -1,6 +1,7 @@
 {
     "token": "MzA2ODgxOTcwNDIyNjc3NTE1.WQD8Gw.6aFgElntch44Yrp7an0p2UFu7TI",
     "GUILD_ID": "255406290518540289",
-    "CLIENT_ID": "306881970422677515"
-
+    "CLIENT_ID": "306881970422677515",
+    "dburl": "mongodb://192.168.1.5:27017",
+    "dbName": "EventDb"
 }
